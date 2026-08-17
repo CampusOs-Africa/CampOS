@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: campusos-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-campusos_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-campusos_prod_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?CRITICAL: POSTGRES_PASSWORD is required in production}
+    # Do not expose PostgreSQL port to public internet in production
+    expose:
+      - "5432"
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  redis:
+    image: redis:7-alpine
+    container_name: campusos-redis-prod
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD:?CRITICAL: REDIS_PASSWORD is required in production}
+    expose:
+      - "6379"
+    volumes:
+      - redis_prod_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campusos-backend-prod
+    restart: always
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
+      QUAI_RPC_URL: ${QUAI_RPC_URL:-https://rpc.quai.network}
+      QUAI_CHAIN_ID: "${QUAI_CHAIN_ID:-9000}"
+      QUAI_PRIVATE_KEY: ${QUAI_PRIVATE_KEY:?CRITICAL: QUAI_PRIVATE_KEY required in production}
+      USE_MOCK_BLOCKCHAIN: "False"
+      USE_MOCK_BLIP_PAY: "False"
+      USE_MOCK_CLOUDINARY: "False"
+      USE_MOCK_EMAIL_OTP: "False"
+      ALLOWED_CORS_ORIGINS: "https://campusos.vercel.app,https://campusos.ng,https://www.campusos.ng"
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?CRITICAL: JWT_SECRET_KEY required in production}
+      BLIP_PAY_WEBHOOK_SECRET: ${BLIP_PAY_WEBHOOK_SECRET:?CRITICAL: BLIP_PAY_WEBHOOK_SECRET required in production}
+      QR_SECRET_KEY: ${QR_SECRET_KEY:?CRITICAL: QR_SECRET_KEY required in production}
+      RESEND_API_KEY: ${RESEND_API_KEY:?CRITICAL: RESEND_API_KEY required in production}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "10"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campusos-frontend-prod
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: https://api.campusos.ng/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:

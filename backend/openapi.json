@@ -1,0 +1,6782 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CampusOS Backend",
+    "description": "\n    CampusOS Backend API \u2014 Trusted Operating System for African Universities.\n    Powered by Quai Network & Blip Pay.\n    \n    ### Flagship Module: Verified Student Identity (Milestone 2 & Milestone 3)\n    - Multi-document upload to Cloudinary (Student ID, Admission Letter)\n    - Institutional email (.edu.ng) validation\n    - Administrative verification queue & review workflow\n    - SHA-256 cryptographic credential hashing\n    - Quai Network on-chain credential registration (`StudentIdentity` smart contract)\n    - Permanent cryptographically signed Campus Identity QR\n    - Strict OWASP security headers, rate limiting, and magic-bytes file validation\n    ",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/verification/send-email-otp": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Send institutional email verification OTP",
+        "description": "Dispatches a 6-digit OTP to the student's university email address (.edu.ng) via Resend.",
+        "operationId": "send_email_otp_api_v1_verification_send_email_otp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailOTPSendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailOTPSendResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/verify-email-otp": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Verify institutional email OTP code",
+        "description": "Verifies the 6-digit OTP code sent to the institutional email address.",
+        "operationId": "verify_email_otp_api_v1_verification_verify_email_otp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailOTPVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailOTPVerifyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/upload": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Upload student ID and admission letter for verification",
+        "description": "Submits institutional email (.edu.ng) and Cloudinary-hosted verification documents.",
+        "operationId": "upload_verification_api_v1_verification_upload_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_verification_api_v1_verification_upload_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentVerificationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/status/{user_id}": {
+      "get": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Get user verification status",
+        "description": "Returns current verification state, trust score, SHA-256 credential hash, tx_hash, and latest submission.",
+        "operationId": "get_verification_status_api_v1_verification_status__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerificationStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/history/{user_id}": {
+      "get": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Get verification audit history for user",
+        "description": "Returns chronological audit trail of all verification status transitions.",
+        "operationId": "get_verification_history_api_v1_verification_history__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VerificationHistoryResponse"
+                  },
+                  "title": "Response Get Verification History Api V1 Verification History  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/admin/{verification_id}/approve": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Admin approve verification request",
+        "description": "Approves verification, generates SHA-256 hash, registers on Quai smart contract asynchronously, and awards +10 Trust Score.",
+        "operationId": "admin_approve_verification_api_v1_verification_admin__verification_id__approve_post",
+        "parameters": [
+          {
+            "name": "verification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Verification Id"
+            }
+          },
+          {
+            "name": "admin_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the administrator",
+              "title": "Admin Id"
+            },
+            "description": "UUID of the administrator"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentVerificationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/admin/{verification_id}/reject": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Admin reject verification request",
+        "description": "Rejects verification request with a mandatory explanation reason.",
+        "operationId": "admin_reject_verification_api_v1_verification_admin__verification_id__reject_post",
+        "parameters": [
+          {
+            "name": "verification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Verification Id"
+            }
+          },
+          {
+            "name": "admin_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the administrator",
+              "title": "Admin Id"
+            },
+            "description": "UUID of the administrator"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentVerificationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/admin/{verification_id}/resubmit": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Admin request verification resubmission",
+        "description": "Requests student to re-upload documents with specific corrective instructions.",
+        "operationId": "admin_request_resubmission_api_v1_verification_admin__verification_id__resubmit_post",
+        "parameters": [
+          {
+            "name": "verification_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Verification Id"
+            }
+          },
+          {
+            "name": "admin_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the administrator",
+              "title": "Admin Id"
+            },
+            "description": "UUID of the administrator"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminReviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentVerificationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/admin/queue": {
+      "get": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Admin verification queue",
+        "description": "Returns filterable list of student verification requests for administrative review.",
+        "operationId": "get_admin_queue_api_v1_verification_admin_queue_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status ('pending', 'approved', 'rejected', etc.)",
+              "title": "Status"
+            },
+            "description": "Filter by status ('pending', 'approved', 'rejected', etc.)"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StudentVerificationResponse"
+                  },
+                  "title": "Response Get Admin Queue Api V1 Verification Admin Queue Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/blockchain/{user_id}": {
+      "get": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Verify on-chain credential proof on Quai Network",
+        "description": "Returns simulated or live on-chain verification state, SHA-256 hash, and transaction receipt from Quai StudentIdentity contract.",
+        "operationId": "verify_blockchain_credential_api_v1_verification_blockchain__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/qr/{user_id}": {
+      "get": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Generate signed permanent Campus Identity QR payload",
+        "description": "Generates an HMAC-SHA256 cryptographically signed QR token encoding student UUID, status, blockchain credential ID, and timestamp.",
+        "operationId": "get_campus_identity_qr_api_v1_verification_qr__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusIdentityQRPayload"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/verification/qr/scan": {
+      "post": {
+        "tags": [
+          "Verified Student Identity"
+        ],
+        "summary": "Scan and verify a Campus Identity QR payload",
+        "description": "Cryptographically validates an HMAC-SHA256 Campus Identity QR payload for administrators, merchants, and campus access control.",
+        "operationId": "scan_campus_identity_qr_api_v1_verification_qr_scan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CampusIdentityQRScanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CampusIdentityQRScanResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/": {
+      "post": {
+        "tags": [
+          "Users (Milestone 1 Integration)"
+        ],
+        "summary": "Create a new user account (Milestone 1 integration)",
+        "operationId": "create_user_api_v1_users__post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users (Milestone 1 Integration)"
+        ],
+        "summary": "List users",
+        "operationId": "list_users_api_v1_users__get",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  },
+                  "title": "Response List Users Api V1 Users  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}": {
+      "get": {
+        "tags": [
+          "Users (Milestone 1 Integration)"
+        ],
+        "summary": "Get user by ID",
+        "operationId": "get_user_api_v1_users__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wallet/connect": {
+      "post": {
+        "tags": [
+          "Campus Wallet (Quai Network)"
+        ],
+        "summary": "Connect and authenticate Quai EVM wallet via signed message",
+        "description": "Validates Web3 cryptographic signature to bind an EVM wallet address to a CampusOS student account.",
+        "operationId": "connect_wallet_api_v1_wallet_connect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WalletConnectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletConnectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wallet/balance": {
+      "get": {
+        "tags": [
+          "Campus Wallet (Quai Network)"
+        ],
+        "summary": "Get real-time Quai Network balance and NGN equivalent",
+        "description": "Fetches live QUAI testnet balance from JSON-RPC node and converts to NGN fiat valuation.",
+        "operationId": "get_wallet_balance_api_v1_wallet_balance_get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "UUID of the student (optional if wallet_address is provided)",
+              "title": "User Id"
+            },
+            "description": "UUID of the student (optional if wallet_address is provided)"
+          },
+          {
+            "name": "wallet_address",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Quai EVM wallet address (optional if user_id is provided)",
+              "title": "Wallet Address"
+            },
+            "description": "Quai EVM wallet address (optional if user_id is provided)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletBalanceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wallet/history": {
+      "get": {
+        "tags": [
+          "Campus Wallet (Quai Network)"
+        ],
+        "summary": "Get paginated Quai transaction history",
+        "description": "Returns chronological audit trail of all P2P sends, receives, deposits, and faucet claims.",
+        "operationId": "get_wallet_history_api_v1_wallet_history_get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the student",
+              "title": "User Id"
+            },
+            "description": "UUID of the student"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransactionResponse"
+                  },
+                  "title": "Response Get Wallet History Api V1 Wallet History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wallet/send": {
+      "post": {
+        "tags": [
+          "Campus Wallet (Quai Network)"
+        ],
+        "summary": "Send QUAI to a student or Quai EVM address",
+        "description": "Transfers QUAI testnet tokens to a recipient address, email, or student UUID and logs immutable receipt.",
+        "operationId": "send_quai_api_v1_wallet_send_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WalletSendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletSendResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/wallet/dashboard/{user_id}": {
+      "get": {
+        "tags": [
+          "Campus Wallet (Quai Network)"
+        ],
+        "summary": "Get comprehensive Campus Wallet dashboard profile",
+        "description": "Returns connected wallet, live balance, transaction history, QR receive address, and trust score.",
+        "operationId": "get_wallet_dashboard_api_v1_wallet_dashboard__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletDashboardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/categories": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "List all marketplace categories",
+        "description": "Returns list of available marketplace categories with active listing counts.",
+        "operationId": "get_marketplace_categories_api_v1_marketplace_categories_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceCategoryResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Marketplace Categories Api V1 Marketplace Categories Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/listings": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Get filterable marketplace catalog",
+        "description": "Returns active marketplace listings filterable by category, condition, price range, and search keyword.",
+        "operationId": "get_marketplace_catalog_api_v1_marketplace_listings_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "books|electronics|accommodation|tutoring|tickets|services",
+              "title": "Category"
+            },
+            "description": "books|electronics|accommodation|tutoring|tickets|services"
+          },
+          {
+            "name": "condition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "new|like_new|good|fair|poor",
+              "title": "Condition"
+            },
+            "description": "new|like_new|good|fair|poor"
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Price"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Price"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search title and description",
+              "title": "Search"
+            },
+            "description": "Search title and description"
+          },
+          {
+            "name": "seller_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by seller UUID",
+              "title": "Seller Id"
+            },
+            "description": "Filter by seller UUID"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status ('active', 'sold', etc.)",
+              "default": "active",
+              "title": "Status"
+            },
+            "description": "Filter by status ('active', 'sold', etc.)"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceListingResponse"
+                  },
+                  "title": "Response Get Marketplace Catalog Api V1 Marketplace Listings Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Create a marketplace listing",
+        "description": "Creates a new listing. Enforces RBAC gate: seller must possess an approved Verified Student Identity.",
+        "operationId": "create_listing_api_v1_marketplace_listings_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Get filterable marketplace catalog",
+        "description": "Returns active marketplace listings filterable by category, condition, price range, and search keyword.",
+        "operationId": "get_marketplace_catalog_api_v1_marketplace__get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "books|electronics|accommodation|tutoring|tickets|services",
+              "title": "Category"
+            },
+            "description": "books|electronics|accommodation|tutoring|tickets|services"
+          },
+          {
+            "name": "condition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "new|like_new|good|fair|poor",
+              "title": "Condition"
+            },
+            "description": "new|like_new|good|fair|poor"
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Price"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Price"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search title and description",
+              "title": "Search"
+            },
+            "description": "Search title and description"
+          },
+          {
+            "name": "seller_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by seller UUID",
+              "title": "Seller Id"
+            },
+            "description": "Filter by seller UUID"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status ('active', 'sold', etc.)",
+              "default": "active",
+              "title": "Status"
+            },
+            "description": "Filter by status ('active', 'sold', etc.)"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceListingResponse"
+                  },
+                  "title": "Response Get Marketplace Catalog Api V1 Marketplace  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Create a marketplace listing",
+        "description": "Creates a new listing. Enforces RBAC gate: seller must possess an approved Verified Student Identity.",
+        "operationId": "create_listing_api_v1_marketplace__post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Get filterable marketplace catalog",
+        "description": "Returns active marketplace listings filterable by category, condition, price range, and search keyword.",
+        "operationId": "get_marketplace_catalog_api_v1_marketplace_get",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "books|electronics|accommodation|tutoring|tickets|services",
+              "title": "Category"
+            },
+            "description": "books|electronics|accommodation|tutoring|tickets|services"
+          },
+          {
+            "name": "condition",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "new|like_new|good|fair|poor",
+              "title": "Condition"
+            },
+            "description": "new|like_new|good|fair|poor"
+          },
+          {
+            "name": "min_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Price"
+            }
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Price"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search title and description",
+              "title": "Search"
+            },
+            "description": "Search title and description"
+          },
+          {
+            "name": "seller_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by seller UUID",
+              "title": "Seller Id"
+            },
+            "description": "Filter by seller UUID"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status ('active', 'sold', etc.)",
+              "default": "active",
+              "title": "Status"
+            },
+            "description": "Filter by status ('active', 'sold', etc.)"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceListingResponse"
+                  },
+                  "title": "Response Get Marketplace Catalog Api V1 Marketplace Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Create a marketplace listing",
+        "description": "Creates a new listing. Enforces RBAC gate: seller must possess an approved Verified Student Identity.",
+        "operationId": "create_listing_api_v1_marketplace_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/sellers/{seller_id}": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Get seller reputation profile",
+        "description": "Returns seller user profile, Trust Score, active listings count, total sales, and peer reviews.",
+        "operationId": "get_seller_profile_api_v1_marketplace_sellers__seller_id__get",
+        "parameters": [
+          {
+            "name": "seller_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Seller Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/listings/{listing_id}": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Get listing by ID",
+        "description": "Returns detailed marketplace listing enriched with seller profile and trust badge.",
+        "operationId": "get_listing_by_id_api_v1_marketplace_listings__listing_id__get",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Update marketplace listing",
+        "description": "Updates listing attributes. Enforces ownership check (seller or admin only).",
+        "operationId": "update_listing_api_v1_marketplace_listings__listing_id__put",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the seller or administrator",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the seller or administrator"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Delete marketplace listing",
+        "description": "Deletes or suspends listing. Enforces ownership check.",
+        "operationId": "delete_listing_api_v1_marketplace_listings__listing_id__delete",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the seller or administrator",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the seller or administrator"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/marketplace/{listing_id}": {
+      "get": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Get listing by ID",
+        "description": "Returns detailed marketplace listing enriched with seller profile and trust badge.",
+        "operationId": "get_listing_by_id_api_v1_marketplace__listing_id__get",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Update marketplace listing",
+        "description": "Updates listing attributes. Enforces ownership check (seller or admin only).",
+        "operationId": "update_listing_api_v1_marketplace__listing_id__put",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the seller or administrator",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the seller or administrator"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarketplaceListingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceListingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Campus Marketplace"
+        ],
+        "summary": "Delete marketplace listing",
+        "description": "Deletes or suspends listing. Enforces ownership check.",
+        "operationId": "delete_listing_api_v1_marketplace__listing_id__delete",
+        "parameters": [
+          {
+            "name": "listing_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Listing Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the seller or administrator",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the seller or administrator"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/initiate": {
+      "post": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Initiate Blip Pay checkout intent",
+        "description": "Locks inventory row, generates unique Blip Pay intent reference, provides duplicate payment protection, and creates initiated order.",
+        "operationId": "initiate_checkout_api_v1_payments_initiate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlipPayInitiateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/webhook": {
+      "post": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Blip Pay payment confirmation webhook",
+        "description": "Validates HMAC-SHA256 signature, enforces idempotency, locks Quai Network smart contract escrow, and transitions order to 'escrow_locked'.",
+        "operationId": "handle_blip_webhook_api_v1_payments_webhook_post",
+        "parameters": [
+          {
+            "name": "X-Blip-Signature",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Blip-Signature"
+            }
+          },
+          {
+            "name": "X-Blip-Timestamp",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Blip-Timestamp"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlipPayWebhookPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/refund": {
+      "post": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Refund Blip Pay payment and Quai Network escrow",
+        "description": "Processes full refund to buyer, transitions order to 'refunded', restores listing inventory, and logs BlipPaymentRecord audit entry.",
+        "operationId": "refund_payment_api_v1_payments_refund_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the order to refund",
+              "title": "Order Id"
+            },
+            "description": "UUID of the order to refund"
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the seller or administrator",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the seller or administrator"
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional explanation for refund",
+              "title": "Reason"
+            },
+            "description": "Optional explanation for refund"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/callback/success": {
+      "get": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Blip Pay payment success browser callback",
+        "description": "Callback endpoint where users are redirected after successful Blip Pay checkout.",
+        "operationId": "payment_success_callback_api_v1_payments_callback_success_get",
+        "parameters": [
+          {
+            "name": "reference",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique Blip Pay order reference",
+              "title": "Reference"
+            },
+            "description": "Unique Blip Pay order reference"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Payment Success Callback Api V1 Payments Callback Success Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/callback/failure": {
+      "get": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Blip Pay payment failure browser callback",
+        "description": "Callback endpoint where users are redirected after failed or cancelled Blip Pay checkout.",
+        "operationId": "payment_failure_callback_api_v1_payments_callback_failure_get",
+        "parameters": [
+          {
+            "name": "reference",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Unique Blip Pay order reference",
+              "title": "Reference"
+            },
+            "description": "Unique Blip Pay order reference"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Payment Failure Callback Api V1 Payments Callback Failure Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/records/order/{order_id}": {
+      "get": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Get audited Blip Pay payment records for an order",
+        "description": "Returns chronological audit trail of all Blip Pay payment intents and webhooks associated with an order ID.",
+        "operationId": "get_payment_records_by_order_api_v1_payments_records_order__order_id__get",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlipPaymentRecordResponse"
+                  },
+                  "title": "Response Get Payment Records By Order Api V1 Payments Records Order  Order Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payments/records/reference/{payment_reference}": {
+      "get": {
+        "tags": [
+          "Payments (Blip Pay & Escrow)"
+        ],
+        "summary": "Get Blip Pay payment record by payment reference",
+        "description": "Returns specific Blip Pay payment audit record matching the unique payment reference.",
+        "operationId": "get_payment_record_by_reference_api_v1_payments_records_reference__payment_reference__get",
+        "parameters": [
+          {
+            "name": "payment_reference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Payment Reference"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlipPaymentRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Create a new marketplace order",
+        "description": "Creates a new order with line items in 'initiated' status.",
+        "operationId": "create_order_api_v1_orders__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Create a new marketplace order",
+        "description": "Creates a new order with line items in 'initiated' status.",
+        "operationId": "create_order_api_v1_orders_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/history": {
+      "get": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Get paginated order history for user",
+        "description": "Returns chronological order history for a student as buyer, seller, or both.",
+        "operationId": "get_order_history_api_v1_orders_history_get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the student",
+              "title": "User Id"
+            },
+            "description": "UUID of the student"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Filter by role ('buyer', 'seller', 'all')",
+              "default": "all",
+              "title": "Role"
+            },
+            "description": "Filter by role ('buyer', 'seller', 'all')"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  },
+                  "title": "Response Get Order History Api V1 Orders History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_id}": {
+      "get": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Get order by ID",
+        "description": "Returns order details, escrow status, and Quai Network escrow transaction hash.",
+        "operationId": "get_order_by_id_api_v1_orders__order_id__get",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/buyer/{buyer_id}": {
+      "get": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Get paginated orders for buyer",
+        "description": "Returns chronological list of orders placed by the student.",
+        "operationId": "get_orders_by_buyer_api_v1_orders_buyer__buyer_id__get",
+        "parameters": [
+          {
+            "name": "buyer_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Buyer Id"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  },
+                  "title": "Response Get Orders By Buyer Api V1 Orders Buyer  Buyer Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/seller/{seller_id}": {
+      "get": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Get paginated orders for seller",
+        "description": "Returns chronological list of orders received by the seller.",
+        "operationId": "get_orders_by_seller_api_v1_orders_seller__seller_id__get",
+        "parameters": [
+          {
+            "name": "seller_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Seller Id"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderResponse"
+                  },
+                  "title": "Response Get Orders By Seller Api V1 Orders Seller  Seller Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_id}/cancel": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Cancel marketplace order",
+        "description": "Cancels an order that is initiated or escrow_locked.",
+        "operationId": "cancel_order_api_v1_orders__order_id__cancel_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the buyer, seller, or admin",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the buyer, seller, or admin"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_id}/confirm-shipment": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Confirm shipment of order item",
+        "description": "Transitions order from 'escrow_locked' or 'escrow_funded' to 'shipped_pending_delivery'.",
+        "operationId": "confirm_shipment_api_v1_orders__order_id__confirm_shipment_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the seller",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the seller"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_id}/confirm-delivery": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Confirm physical delivery of order",
+        "description": "Transitions order from 'escrow_locked' to 'delivered_pending_release'.",
+        "operationId": "confirm_delivery_api_v1_orders__order_id__confirm_delivery_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the buyer or seller",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the buyer or seller"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_id}/release-escrow": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Release Quai smart contract escrow",
+        "description": "Releases escrow funds on Quai Network, marks order as completed, and awards +5 Trust Score to both Buyer and Seller.",
+        "operationId": "release_escrow_api_v1_orders__order_id__release_escrow_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the buyer or administrator",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the buyer or administrator"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_id}/dispute": {
+      "post": {
+        "tags": [
+          "Orders & Quai Escrow"
+        ],
+        "summary": "Dispute marketplace order",
+        "description": "Opens formal dispute on escrow order for administrative governance review.",
+        "operationId": "dispute_order_api_v1_orders__order_id__dispute_post",
+        "parameters": [
+          {
+            "name": "order_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order Id"
+            }
+          },
+          {
+            "name": "actor_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the buyer or seller",
+              "title": "Actor Id"
+            },
+            "description": "UUID of the buyer or seller"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderDisputeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escrow/create": {
+      "post": {
+        "tags": [
+          "Quai Smart Contract Escrow"
+        ],
+        "summary": "Create an escrow record and lock on Quai Network",
+        "description": "Creates an EscrowRecord in PostgreSQL and initializes smart contract escrow locking.",
+        "operationId": "create_escrow_api_v1_escrow_create_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscrowCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscrowRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escrow/deposit": {
+      "post": {
+        "tags": [
+          "Quai Smart Contract Escrow"
+        ],
+        "summary": "Deposit funds into escrow contract on Quai Network",
+        "description": "Transitions escrow state to FUNDED and order status to escrow_funded.",
+        "operationId": "deposit_escrow_api_v1_escrow_deposit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscrowActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscrowRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escrow/release": {
+      "post": {
+        "tags": [
+          "Quai Smart Contract Escrow"
+        ],
+        "summary": "Release escrow funds to seller",
+        "description": "Releases escrow funds on Quai Network, transitions state to COMPLETED, and awards +5 Trust Score.",
+        "operationId": "release_escrow_api_v1_escrow_release_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscrowActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscrowRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escrow/refund": {
+      "post": {
+        "tags": [
+          "Quai Smart Contract Escrow"
+        ],
+        "summary": "Refund escrow funds to buyer",
+        "description": "Refunds escrow funds on Quai Network, transitions state to REFUNDED, and applies trust score penalty.",
+        "operationId": "refund_escrow_api_v1_escrow_refund_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscrowActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscrowRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escrow/dispute": {
+      "post": {
+        "tags": [
+          "Quai Smart Contract Escrow"
+        ],
+        "summary": "Dispute escrow transaction",
+        "description": "Transitions escrow state to DISPUTED for administrative governance review.",
+        "operationId": "dispute_escrow_api_v1_escrow_dispute_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EscrowActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscrowRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/escrow/{id}": {
+      "get": {
+        "tags": [
+          "Quai Smart Contract Escrow"
+        ],
+        "summary": "Get escrow details by ID or order ID",
+        "description": "Returns full EscrowRecord including Quai order ID, expiration timestamp, and state.",
+        "operationId": "get_escrow_by_id_api_v1_escrow__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EscrowRecordResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/": {
+      "post": {
+        "tags": [
+          "Reputation & Reviews"
+        ],
+        "summary": "Submit peer or marketplace review",
+        "description": "Submits star rating and comment. Awards +2 Trust Score to Seller for 4-5 star marketplace reviews or +1 for peer reviews.",
+        "operationId": "submit_review_api_v1_reviews__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews": {
+      "post": {
+        "tags": [
+          "Reputation & Reviews"
+        ],
+        "summary": "Submit peer or marketplace review",
+        "description": "Submits star rating and comment. Awards +2 Trust Score to Seller for 4-5 star marketplace reviews or +1 for peer reviews.",
+        "operationId": "submit_review_api_v1_reviews_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/user/{user_id}": {
+      "get": {
+        "tags": [
+          "Reputation & Reviews"
+        ],
+        "summary": "Get peer or marketplace reviews received by user",
+        "description": "Returns chronological list of reputation reviews received by the student.",
+        "operationId": "get_user_reviews_api_v1_reviews_user__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "review_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by type ('marketplace', 'peer', or 'all')",
+              "title": "Review Type"
+            },
+            "description": "Filter by type ('marketplace', 'peer', or 'all')"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Filter by status",
+              "default": "approved",
+              "title": "Status"
+            },
+            "description": "Filter by status"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewResponse"
+                  },
+                  "title": "Response Get User Reviews Api V1 Reviews User  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/{review_id}/moderate": {
+      "post": {
+        "tags": [
+          "Reputation & Reviews"
+        ],
+        "summary": "Admin moderate a review",
+        "description": "Allows administrators to approve, flag, or remove a review. Removing an approved positive review reverses the trust score bonus.",
+        "operationId": "moderate_review_api_v1_reviews__review_id__moderate_post",
+        "parameters": [
+          {
+            "name": "review_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Review Id"
+            }
+          },
+          {
+            "name": "admin_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the administrator",
+              "title": "Admin Id"
+            },
+            "description": "UUID of the administrator"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewModerateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reviews/admin/queue": {
+      "get": {
+        "tags": [
+          "Reputation & Reviews"
+        ],
+        "summary": "Admin review moderation queue",
+        "description": "Returns filterable list of flagged or pending reviews for administrator moderation.",
+        "operationId": "get_moderation_queue_api_v1_reviews_admin_queue_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Status filter ('flagged', etc.)",
+              "default": "flagged",
+              "title": "Status"
+            },
+            "description": "Status filter ('flagged', etc.)"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewResponse"
+                  },
+                  "title": "Response Get Moderation Queue Api V1 Reviews Admin Queue Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust/dashboard/{user_id}": {
+      "get": {
+        "tags": [
+          "Campus Trust Score Engine"
+        ],
+        "summary": "Get user Trust Score dashboard",
+        "description": "Returns current bounded Trust Score (0\u2013100), badge ('Platinum', 'Gold', etc.), positive/penalty breakdown, and immutable history trail.",
+        "operationId": "get_trust_dashboard_api_v1_trust_dashboard__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustDashboardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust/leaderboard": {
+      "get": {
+        "tags": [
+          "Campus Trust Score Engine"
+        ],
+        "summary": "Get campus Trust Score leaderboard",
+        "description": "Returns top trusted students across campus filterable by school, department, and role.",
+        "operationId": "get_trust_leaderboard_api_v1_trust_leaderboard_get",
+        "parameters": [
+          {
+            "name": "school",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by school or institution",
+              "title": "School"
+            },
+            "description": "Filter by school or institution"
+          },
+          {
+            "name": "department",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by department",
+              "title": "Department"
+            },
+            "description": "Filter by department"
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by role ('student', etc.)",
+              "default": "student",
+              "title": "Role"
+            },
+            "description": "Filter by role ('student', etc.)"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrustLeaderboardEntryResponse"
+                  },
+                  "title": "Response Get Trust Leaderboard Api V1 Trust Leaderboard Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust/history/{user_id}": {
+      "get": {
+        "tags": [
+          "Campus Trust Score Engine"
+        ],
+        "summary": "Get immutable Trust Score audit trail for user",
+        "description": "Returns chronological audit trail of all Trust Score reward and penalty events.",
+        "operationId": "get_trust_history_api_v1_trust_history__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrustHistoryResponse"
+                  },
+                  "title": "Response Get Trust History Api V1 Trust History  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trust/analytics": {
+      "get": {
+        "tags": [
+          "Campus Trust Score Engine"
+        ],
+        "summary": "Get campus-wide Trust Score analytics",
+        "description": "Returns average campus score, verified student count, 24h event count, and score tier distribution.",
+        "operationId": "get_campus_trust_analytics_api_v1_trust_analytics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrustAnalyticsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fraud/reports": {
+      "post": {
+        "tags": [
+          "Fraud Reporting & Dispute Governance"
+        ],
+        "summary": "Submit a fraud or scam report",
+        "description": "Submits a formal fraud report against a student or seller with Cloudinary evidence URL.",
+        "operationId": "submit_fraud_report_api_v1_fraud_reports_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FraudReportCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FraudReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Fraud Reporting & Dispute Governance"
+        ],
+        "summary": "List fraud reports for administration or user",
+        "description": "Returns filterable list of fraud reports by status or reported user UUID.",
+        "operationId": "list_fraud_reports_api_v1_fraud_reports_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by status ('pending', 'investigating', 'resolved_confirmed', etc.)",
+              "title": "Status"
+            },
+            "description": "Filter by status ('pending', 'investigating', 'resolved_confirmed', etc.)"
+          },
+          {
+            "name": "reported_user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by reported user UUID",
+              "title": "Reported User Id"
+            },
+            "description": "Filter by reported user UUID"
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Skip"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FraudReportResponse"
+                  },
+                  "title": "Response List Fraud Reports Api V1 Fraud Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fraud/reports/{report_id}": {
+      "get": {
+        "tags": [
+          "Fraud Reporting & Dispute Governance"
+        ],
+        "summary": "Get fraud report details by ID",
+        "description": "Returns specific fraud report including evidence URL, resolution notes, and applied penalty.",
+        "operationId": "get_fraud_report_by_id_api_v1_fraud_reports__report_id__get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FraudReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fraud/reports/{report_id}/resolve": {
+      "post": {
+        "tags": [
+          "Fraud Reporting & Dispute Governance"
+        ],
+        "summary": "Admin resolve fraud report",
+        "description": "Administrator resolution of fraud report. Confirming fraud automatically deducts penalty points from reported user Trust Score.",
+        "operationId": "resolve_fraud_report_api_v1_fraud_reports__report_id__resolve_post",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Report Id"
+            }
+          },
+          {
+            "name": "admin_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "UUID of the administrator",
+              "title": "Admin Id"
+            },
+            "description": "UUID of the administrator"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FraudReportResolveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FraudReportResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "System health check probe",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminReviewRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "title": "Reason",
+            "description": "Reason for rejection or resubmission request."
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "AdminReviewRequest"
+      },
+      "BlipPayInitiateResponse": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "payment_reference": {
+            "type": "string",
+            "title": "Payment Reference"
+          },
+          "payment_url": {
+            "type": "string",
+            "title": "Payment Url"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "NGN"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "initiated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "payment_reference",
+          "payment_url",
+          "amount"
+        ],
+        "title": "BlipPayInitiateResponse"
+      },
+      "BlipPayWebhookPayload": {
+        "properties": {
+          "payment_reference": {
+            "type": "string",
+            "title": "Payment Reference",
+            "description": "Unique Blip Pay order reference"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Payment status ('success', 'failed')",
+            "default": "success"
+          },
+          "transaction_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transaction Id"
+          },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "raw_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_reference"
+        ],
+        "title": "BlipPayWebhookPayload"
+      },
+      "BlipPaymentRecordResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "payment_reference": {
+            "type": "string",
+            "title": "Payment Reference"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider",
+            "default": "blip_pay"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "order_id",
+          "user_id",
+          "payment_reference",
+          "amount",
+          "currency",
+          "status",
+          "created_at"
+        ],
+        "title": "BlipPaymentRecordResponse"
+      },
+      "Body_upload_verification_api_v1_verification_upload_post": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "UUID of the submitting user"
+          },
+          "university_email": {
+            "type": "string",
+            "title": "University Email",
+            "description": "University email address (.edu.ng, .edu)"
+          },
+          "student_id": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Student Id",
+            "description": "Student ID document (PDF, PNG, JPG <= 5MB)"
+          },
+          "admission_letter": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Admission Letter",
+            "description": "Admission letter document (PDF, PNG, JPG <= 5MB)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "university_email",
+          "student_id",
+          "admission_letter"
+        ],
+        "title": "Body_upload_verification_api_v1_verification_upload_post"
+      },
+      "CampusIdentityQRPayload": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "credential_id": {
+            "type": "string",
+            "title": "Credential Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          },
+          "payload_string": {
+            "type": "string",
+            "title": "Payload String"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "status",
+          "credential_id",
+          "timestamp",
+          "signature",
+          "payload_string"
+        ],
+        "title": "CampusIdentityQRPayload"
+      },
+      "CampusIdentityQRScanRequest": {
+        "properties": {
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload",
+            "description": "Scanned JSON object from Campus Identity QR code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "title": "CampusIdentityQRScanRequest"
+      },
+      "CampusIdentityQRScanResponse": {
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "title": "Valid"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "credential_id": {
+            "type": "string",
+            "title": "Credential Id"
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature"
+          },
+          "on_chain_status": {
+            "type": "string",
+            "title": "On Chain Status"
+          },
+          "verified_by": {
+            "type": "string",
+            "title": "Verified By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "valid",
+          "user_id",
+          "status",
+          "credential_id",
+          "timestamp",
+          "signature",
+          "on_chain_status",
+          "verified_by"
+        ],
+        "title": "CampusIdentityQRScanResponse"
+      },
+      "EmailOTPSendRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "UUID of the student user"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Institutional university email (.edu.ng)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email"
+        ],
+        "title": "EmailOTPSendRequest"
+      },
+      "EmailOTPSendResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "expires_in_seconds": {
+            "type": "integer",
+            "title": "Expires In Seconds",
+            "default": 600
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "email"
+        ],
+        "title": "EmailOTPSendResponse"
+      },
+      "EmailOTPVerifyRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "UUID of the student user"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Institutional university email (.edu.ng)"
+          },
+          "otp_code": {
+            "type": "string",
+            "maxLength": 6,
+            "minLength": 6,
+            "title": "Otp Code",
+            "description": "6-digit OTP code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "email",
+          "otp_code"
+        ],
+        "title": "EmailOTPVerifyRequest"
+      },
+      "EmailOTPVerifyResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "verified_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Verified At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "user_id",
+          "email",
+          "verified_at"
+        ],
+        "title": "EmailOTPVerifyResponse"
+      },
+      "EscrowActionRequest": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id",
+            "description": "UUID of the order"
+          },
+          "actor_id": {
+            "type": "string",
+            "title": "Actor Id",
+            "description": "UUID of the actor (buyer, seller, or admin)"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason",
+            "description": "Reason for refund or dispute"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "actor_id"
+        ],
+        "title": "EscrowActionRequest"
+      },
+      "EscrowCreateRequest": {
+        "properties": {
+          "order_id": {
+            "type": "string",
+            "title": "Order Id",
+            "description": "UUID of the order"
+          },
+          "buyer_id": {
+            "type": "string",
+            "title": "Buyer Id",
+            "description": "UUID of the buyer"
+          },
+          "seller_id": {
+            "type": "string",
+            "title": "Seller Id",
+            "description": "UUID of the seller"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount",
+            "description": "Amount in QUAI / NGN"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_id",
+          "buyer_id",
+          "seller_id",
+          "amount"
+        ],
+        "title": "EscrowCreateRequest"
+      },
+      "EscrowRecordResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "buyer_id": {
+            "type": "string",
+            "title": "Buyer Id"
+          },
+          "seller_id": {
+            "type": "string",
+            "title": "Seller Id"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "state": {
+            "type": "string",
+            "title": "State"
+          },
+          "quai_order_id": {
+            "type": "string",
+            "title": "Quai Order Id"
+          },
+          "escrow_tx_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escrow Tx Hash"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "order_id",
+          "buyer_id",
+          "seller_id",
+          "amount",
+          "state",
+          "quai_order_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "EscrowRecordResponse"
+      },
+      "FraudReportCreateRequest": {
+        "properties": {
+          "reporter_id": {
+            "type": "string",
+            "title": "Reporter Id",
+            "description": "UUID of reporting user"
+          },
+          "reported_user_id": {
+            "type": "string",
+            "title": "Reported User Id",
+            "description": "UUID of reported user"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "'scam_listing', 'fake_item', 'non_delivery', 'identity_fraud', 'other'"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Description"
+          },
+          "evidence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Url",
+            "description": "Cloudinary evidence image or PDF URL"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id",
+            "description": "Optional associated marketplace order UUID"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reporter_id",
+          "reported_user_id",
+          "category",
+          "description"
+        ],
+        "title": "FraudReportCreateRequest"
+      },
+      "FraudReportResolveRequest": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "'resolved_confirmed' or 'resolved_dismissed'"
+          },
+          "penalty_points": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 0.0,
+            "title": "Penalty Points",
+            "description": "Points to deduct if confirmed fraud",
+            "default": 20
+          },
+          "resolution_notes": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 5,
+            "title": "Resolution Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "resolution_notes"
+        ],
+        "title": "FraudReportResolveRequest"
+      },
+      "FraudReportResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "reporter_id": {
+            "type": "string",
+            "title": "Reporter Id"
+          },
+          "reported_user_id": {
+            "type": "string",
+            "title": "Reported User Id"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "evidence_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Url"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "admin_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Admin Id"
+          },
+          "resolution_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Notes"
+          },
+          "penalty_applied": {
+            "type": "integer",
+            "title": "Penalty Applied",
+            "default": 0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "resolved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved At"
+          },
+          "reporter_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reporter Name"
+          },
+          "reported_user_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported User Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "reporter_id",
+          "reported_user_id",
+          "category",
+          "description",
+          "status",
+          "created_at"
+        ],
+        "title": "FraudReportResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MarketplaceCategoryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "active_count": {
+            "type": "integer",
+            "title": "Active Count",
+            "default": 0
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "created_at"
+        ],
+        "title": "MarketplaceCategoryResponse"
+      },
+      "MarketplaceListingCreate": {
+        "properties": {
+          "seller_id": {
+            "type": "string",
+            "title": "Seller Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 3,
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 5,
+            "title": "Description"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "books|electronics|accommodation|tutoring|tickets|services"
+          },
+          "price": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Price"
+          },
+          "condition": {
+            "type": "string",
+            "title": "Condition",
+            "description": "new|like_new|good|fair|poor",
+            "default": "good"
+          },
+          "inventory_count": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Inventory Count",
+            "default": 1
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Images",
+            "description": "ARRAY of Cloudinary URL strings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "seller_id",
+          "title",
+          "description",
+          "category",
+          "price",
+          "images"
+        ],
+        "title": "MarketplaceListingCreate"
+      },
+      "MarketplaceListingResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "seller_id": {
+            "type": "string",
+            "title": "Seller Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "condition": {
+            "type": "string",
+            "title": "Condition"
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Images"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "inventory_count": {
+            "type": "integer",
+            "title": "Inventory Count"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "seller_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seller Name"
+          },
+          "seller_trust_score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seller Trust Score"
+          },
+          "seller_verified": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seller Verified"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "seller_id",
+          "title",
+          "description",
+          "category",
+          "price",
+          "condition",
+          "images",
+          "status",
+          "inventory_count",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "MarketplaceListingResponse"
+      },
+      "MarketplaceListingUpdate": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          },
+          "condition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Condition"
+          },
+          "inventory_count": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inventory Count"
+          },
+          "images": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Images"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "title": "MarketplaceListingUpdate"
+      },
+      "OrderCreateRequest": {
+        "properties": {
+          "buyer_id": {
+            "type": "string",
+            "title": "Buyer Id",
+            "description": "UUID of the buyer"
+          },
+          "listing_id": {
+            "type": "string",
+            "title": "Listing Id",
+            "description": "UUID of the marketplace listing"
+          },
+          "amount": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount",
+            "description": "Agreed purchase amount"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "description": "Quantity of items purchased",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "buyer_id",
+          "listing_id",
+          "amount"
+        ],
+        "title": "OrderCreateRequest"
+      },
+      "OrderDisputeRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 5,
+            "title": "Reason",
+            "description": "Explanation for disputing order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reason"
+        ],
+        "title": "OrderDisputeRequest"
+      },
+      "OrderItemResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "order_id": {
+            "type": "string",
+            "title": "Order Id"
+          },
+          "listing_id": {
+            "type": "string",
+            "title": "Listing Id"
+          },
+          "seller_id": {
+            "type": "string",
+            "title": "Seller Id"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "price_per_unit": {
+            "type": "number",
+            "title": "Price Per Unit"
+          },
+          "subtotal": {
+            "type": "number",
+            "title": "Subtotal"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "order_id",
+          "listing_id",
+          "seller_id",
+          "quantity",
+          "price_per_unit",
+          "subtotal",
+          "created_at"
+        ],
+        "title": "OrderItemResponse"
+      },
+      "OrderResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "buyer_id": {
+            "type": "string",
+            "title": "Buyer Id"
+          },
+          "listing_id": {
+            "type": "string",
+            "title": "Listing Id"
+          },
+          "seller_id": {
+            "type": "string",
+            "title": "Seller Id"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "payment_reference": {
+            "type": "string",
+            "title": "Payment Reference"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "escrow_tx_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escrow Tx Hash"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "listing_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Listing Title"
+          },
+          "buyer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Buyer Name"
+          },
+          "seller_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seller Name"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/OrderItemResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "buyer_id",
+          "listing_id",
+          "seller_id",
+          "amount",
+          "payment_reference",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "OrderResponse"
+      },
+      "ReviewCreateRequest": {
+        "properties": {
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id",
+            "description": "UUID of the completed order (optional for peer reviews)"
+          },
+          "reviewer_id": {
+            "type": "string",
+            "title": "Reviewer Id",
+            "description": "UUID of the person submitting the review"
+          },
+          "reviewee_id": {
+            "type": "string",
+            "title": "Reviewee Id",
+            "description": "UUID of the person being reviewed"
+          },
+          "rating": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Rating",
+            "description": "Star rating from 1 to 5"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "review_type": {
+            "type": "string",
+            "title": "Review Type",
+            "description": "'marketplace' or 'peer'",
+            "default": "marketplace"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reviewer_id",
+          "reviewee_id",
+          "rating"
+        ],
+        "title": "ReviewCreateRequest"
+      },
+      "ReviewModerateRequest": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "'approved', 'flagged', or 'removed'"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "description": "Explanation for moderation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "ReviewModerateRequest"
+      },
+      "ReviewResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "reviewer_id": {
+            "type": "string",
+            "title": "Reviewer Id"
+          },
+          "reviewee_id": {
+            "type": "string",
+            "title": "Reviewee Id"
+          },
+          "rating": {
+            "type": "integer",
+            "title": "Rating"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "review_type": {
+            "type": "string",
+            "title": "Review Type",
+            "default": "marketplace"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "default": "approved"
+          },
+          "moderated_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderated By"
+          },
+          "moderation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderation Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "reviewer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewer Name"
+          },
+          "reviewee_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewee Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "reviewer_id",
+          "reviewee_id",
+          "rating",
+          "created_at"
+        ],
+        "title": "ReviewResponse"
+      },
+      "SellerProfileResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "trust_score": {
+            "type": "integer",
+            "title": "Trust Score"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
+          "active_listings_count": {
+            "type": "integer",
+            "title": "Active Listings Count"
+          },
+          "total_sales_count": {
+            "type": "integer",
+            "title": "Total Sales Count"
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating"
+          },
+          "reviews": {
+            "items": {},
+            "type": "array",
+            "title": "Reviews",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name",
+          "email",
+          "trust_score",
+          "is_verified",
+          "active_listings_count",
+          "total_sales_count",
+          "average_rating"
+        ],
+        "title": "SellerProfileResponse"
+      },
+      "StudentVerificationResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "student_id_url": {
+            "type": "string",
+            "title": "Student Id Url"
+          },
+          "admission_letter_url": {
+            "type": "string",
+            "title": "Admission Letter Url"
+          },
+          "university_email": {
+            "type": "string",
+            "title": "University Email"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason"
+          },
+          "credential_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credential Hash"
+          },
+          "tx_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Hash"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "history": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/VerificationHistoryResponse"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "student_id_url",
+          "admission_letter_url",
+          "university_email",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "StudentVerificationResponse"
+      },
+      "TransactionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "wallet_address": {
+            "type": "string",
+            "title": "Wallet Address"
+          },
+          "recipient_address": {
+            "type": "string",
+            "title": "Recipient Address"
+          },
+          "amount": {
+            "type": "number",
+            "title": "Amount"
+          },
+          "tx_hash": {
+            "type": "string",
+            "title": "Tx Hash"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "network": {
+            "type": "string",
+            "title": "Network"
+          },
+          "block_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Block Number"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "wallet_address",
+          "recipient_address",
+          "amount",
+          "tx_hash",
+          "type",
+          "status",
+          "network",
+          "created_at"
+        ],
+        "title": "TransactionResponse"
+      },
+      "TrustAnalyticsResponse": {
+        "properties": {
+          "campus_average_score": {
+            "type": "number",
+            "title": "Campus Average Score"
+          },
+          "total_verified_students": {
+            "type": "integer",
+            "title": "Total Verified Students"
+          },
+          "score_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Score Distribution"
+          },
+          "recent_trust_events_24h": {
+            "type": "integer",
+            "title": "Recent Trust Events 24H"
+          }
+        },
+        "type": "object",
+        "required": [
+          "campus_average_score",
+          "total_verified_students",
+          "score_distribution",
+          "recent_trust_events_24h"
+        ],
+        "title": "TrustAnalyticsResponse"
+      },
+      "TrustDashboardResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "verification_status": {
+            "type": "string",
+            "title": "Verification Status"
+          },
+          "trust_score": {
+            "type": "integer",
+            "title": "Trust Score"
+          },
+          "trust_badge": {
+            "type": "string",
+            "title": "Trust Badge"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/TrustHistoryResponse"
+            },
+            "type": "array",
+            "title": "History"
+          },
+          "total_positive_earned": {
+            "type": "integer",
+            "title": "Total Positive Earned"
+          },
+          "total_penalties_deducted": {
+            "type": "integer",
+            "title": "Total Penalties Deducted"
+          },
+          "completed_sales": {
+            "type": "integer",
+            "title": "Completed Sales"
+          },
+          "peer_reviews_count": {
+            "type": "integer",
+            "title": "Peer Reviews Count"
+          },
+          "average_rating": {
+            "type": "number",
+            "title": "Average Rating"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name",
+          "email",
+          "verification_status",
+          "trust_score",
+          "trust_badge",
+          "history",
+          "total_positive_earned",
+          "total_penalties_deducted",
+          "completed_sales",
+          "peer_reviews_count",
+          "average_rating"
+        ],
+        "title": "TrustDashboardResponse"
+      },
+      "TrustHistoryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "delta": {
+            "type": "integer",
+            "title": "Delta"
+          },
+          "old_score": {
+            "type": "integer",
+            "title": "Old Score"
+          },
+          "new_score": {
+            "type": "integer",
+            "title": "New Score"
+          },
+          "event_type": {
+            "type": "string",
+            "title": "Event Type"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "reference_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "delta",
+          "old_score",
+          "new_score",
+          "event_type",
+          "reason",
+          "created_at"
+        ],
+        "title": "TrustHistoryResponse"
+      },
+      "TrustLeaderboardEntryResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "School"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "trust_score": {
+            "type": "integer",
+            "title": "Trust Score"
+          },
+          "trust_badge": {
+            "type": "string",
+            "title": "Trust Badge"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
+          "rank": {
+            "type": "integer",
+            "title": "Rank",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "name",
+          "email",
+          "trust_score",
+          "trust_badge",
+          "is_verified"
+        ],
+        "title": "TrustLeaderboardEntryResponse"
+      },
+      "UserCreateRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "wallet_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wallet Address"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": "student"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "School",
+            "default": "University of Jos"
+          },
+          "faculty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faculty",
+            "default": "Natural Sciences"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department",
+            "default": "Computer Science"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level",
+            "default": "300 Level"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "email"
+        ],
+        "title": "UserCreateRequest"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "wallet_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wallet Address"
+          },
+          "student_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Student Id"
+          },
+          "school": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "School"
+          },
+          "faculty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faculty"
+          },
+          "department": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Department"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "trust_score": {
+            "type": "integer",
+            "title": "Trust Score"
+          },
+          "verification_status": {
+            "type": "string",
+            "title": "Verification Status"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "email",
+          "trust_score",
+          "verification_status",
+          "role",
+          "created_at"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VerificationHistoryResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "verification_id": {
+            "type": "string",
+            "title": "Verification Id"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "old_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Old Status"
+          },
+          "new_status": {
+            "type": "string",
+            "title": "New Status"
+          },
+          "changed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Changed By"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "verification_id",
+          "user_id",
+          "new_status",
+          "timestamp"
+        ],
+        "title": "VerificationHistoryResponse"
+      },
+      "VerificationStatusResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "verification_status": {
+            "type": "string",
+            "title": "Verification Status"
+          },
+          "trust_score": {
+            "type": "integer",
+            "title": "Trust Score"
+          },
+          "credential_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credential Hash"
+          },
+          "tx_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Hash"
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "verification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StudentVerificationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "verification_status",
+          "trust_score"
+        ],
+        "title": "VerificationStatusResponse"
+      },
+      "WalletBalanceResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "wallet_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wallet Address"
+          },
+          "balance_quai": {
+            "type": "number",
+            "title": "Balance Quai"
+          },
+          "balance_wei": {
+            "type": "string",
+            "title": "Balance Wei"
+          },
+          "fiat_value_ngn": {
+            "type": "number",
+            "title": "Fiat Value Ngn"
+          },
+          "network": {
+            "type": "string",
+            "title": "Network",
+            "default": "Quai Network Testnet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "balance_quai",
+          "balance_wei",
+          "fiat_value_ngn"
+        ],
+        "title": "WalletBalanceResponse"
+      },
+      "WalletConnectRequest": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "UUID of the student"
+          },
+          "wallet_address": {
+            "type": "string",
+            "title": "Wallet Address",
+            "description": "Quai EVM wallet address (0x...)"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Signed cryptographic authentication challenge string"
+          },
+          "signature": {
+            "type": "string",
+            "title": "Signature",
+            "description": "65-byte hex signature (0x...) from WalletConnect / Web3 provider"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "wallet_address",
+          "message",
+          "signature"
+        ],
+        "title": "WalletConnectRequest"
+      },
+      "WalletConnectResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "wallet_address": {
+            "type": "string",
+            "title": "Wallet Address"
+          },
+          "verified": {
+            "type": "boolean",
+            "title": "Verified"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "wallet_address",
+          "verified",
+          "message"
+        ],
+        "title": "WalletConnectResponse"
+      },
+      "WalletDashboardResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "wallet_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wallet Address"
+          },
+          "balance": {
+            "$ref": "#/components/schemas/WalletBalanceResponse"
+          },
+          "transactions": {
+            "items": {
+              "$ref": "#/components/schemas/TransactionResponse"
+            },
+            "type": "array",
+            "title": "Transactions"
+          },
+          "qr_receive_address": {
+            "type": "string",
+            "title": "Qr Receive Address"
+          },
+          "is_verified": {
+            "type": "boolean",
+            "title": "Is Verified"
+          },
+          "trust_score": {
+            "type": "integer",
+            "title": "Trust Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "balance",
+          "transactions",
+          "qr_receive_address",
+          "is_verified",
+          "trust_score"
+        ],
+        "title": "WalletDashboardResponse"
+      },
+      "WalletSendRequest": {
+        "properties": {
+          "sender_id": {
+            "type": "string",
+            "title": "Sender Id",
+            "description": "UUID of the sender student"
+          },
+          "recipient": {
+            "type": "string",
+            "title": "Recipient",
+            "description": "Quai EVM address (0x...), email, or user UUID of the recipient"
+          },
+          "amount_quai": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Amount Quai",
+            "description": "Amount of QUAI to transfer"
+          },
+          "tx_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Hash",
+            "description": "Optional transaction hash if signed and broadcasted by client wallet"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Optional transfer note or memo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sender_id",
+          "recipient",
+          "amount_quai"
+        ],
+        "title": "WalletSendRequest"
+      },
+      "WalletSendResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "tx_hash": {
+            "type": "string",
+            "title": "Tx Hash"
+          },
+          "amount_quai": {
+            "type": "number",
+            "title": "Amount Quai"
+          },
+          "recipient": {
+            "type": "string",
+            "title": "Recipient"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "tx_hash",
+          "amount_quai",
+          "recipient",
+          "status",
+          "message"
+        ],
+        "title": "WalletSendResponse"
+      }
+    }
+  }
+}

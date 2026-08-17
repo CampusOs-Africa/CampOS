@@ -1,0 +1,22 @@
+{
+  "name": "campusos-contracts",
+  "version": "1.0.0",
+  "description": "Quai Network smart contracts for CampusOS Verified Student Identity & Marketplace Escrow",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:quai-testnet": "hardhat run scripts/deploy.ts --network quaiTestnet",
+    "deploy:escrow": "hardhat run scripts/deployEscrow.ts --network quaiTestnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^16.4.7",
+    "hardhat": "^2.22.18",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.2.0",
+    "quais": "^1.0.0-alpha.56"
+  }
+}

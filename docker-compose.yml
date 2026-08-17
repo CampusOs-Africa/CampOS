@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: campusos-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: campusos
+      POSTGRES_USER: campusos_user
+      POSTGRES_PASSWORD: campusos_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campusos_user -d campusos"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7-alpine
+    container_name: campusos-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: campusos-backend
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: staging
+      DATABASE_URL: postgresql+psycopg2://campusos_user:campusos_secure_password_2026@postgres:5432/campusos
+      REDIS_URL: redis://redis:6379/0
+      QUAI_RPC_URL: https://rpc.quai.network
+      QUAI_CHAIN_ID: "9000"
+      USE_MOCK_BLOCKCHAIN: "True"
+      USE_MOCK_BLIP_PAY: "True"
+      ALLOWED_CORS_ORIGINS: "http://localhost:3000,http://frontend:3000"
+      JWT_SECRET_KEY: "campusos-staging-jwt-secret-key-256-bit-entropy-2026"
+      BLIP_PAY_WEBHOOK_SECRET: "campusos-staging-blip-webhook-secret-key-2026"
+      QR_SECRET_KEY: "campusos-staging-qr-secret-key-2026"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campusos-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+
+  contracts:
+    build:
+      context: ./contracts
+      dockerfile: Dockerfile
+    container_name: campusos-contracts
+    profiles:
+      - deploy
+      - contracts
+    environment:
+      QUAI_NETWORK: hardhat
+      RUN_TESTS: "true"
+      DEPLOY_CONTRACTS: "true"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
