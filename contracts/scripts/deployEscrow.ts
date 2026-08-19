@@ -1,4 +1,4 @@
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -67,7 +67,7 @@ async function main() {
         {
           address: identityAddress,
           tx_hash: identityTx?.hash || "",
-          network: "orchard",
+          network: network.name,
           deployedAt: new Date().toISOString(),
           abi: artifact.abi,
         },
@@ -99,7 +99,7 @@ async function main() {
           address: escrowAddress,
           studentIdentityAddress: identityAddress,
           tx_hash: escrowTx?.hash || "",
-          network: "orchard",
+          network: network.name,
           deployedAt: new Date().toISOString(),
           abi: artifact.abi,
         },

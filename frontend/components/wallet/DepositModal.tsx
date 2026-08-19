@@ -103,7 +103,7 @@ export const DepositModal: React.FC<DepositModalProps> = ({
             </span>
           </div>
           <p className="text-xs text-slate-600">
-            For Quai × Blip Buildathon judges and students testing the platform, claim 25.0 QUAI testnet tokens instantly.
+            For Merchants and Students testing the platform, claim 25.0 QUAI testnet tokens instantly.
           </p>
           <button
             onClick={handleClaimFaucet}

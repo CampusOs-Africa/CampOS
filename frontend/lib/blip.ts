@@ -105,12 +105,23 @@ export async function ensureOrchard(provider?: BlipProvider): Promise<void> {
 export async function requestAppWalletFunding(
   amountWei: bigint,
   provider?: BlipProvider,
+  reason: string = "gas",
 ): Promise<unknown> {
   const p = provider ?? detectBlip();
   if (!p) throw new Error("No provider.");
   return p.request({
     method: "blip_requestAppWalletFunding",
-    params: [{ amount: "0x" + amountWei.toString(16) }],
+    params: [{
+      chainId: ORCHARD_CHAIN_ID_HEX,
+      reason,
+      assets: [{
+        type: "native",
+        symbol: "QUAI",
+        decimals: 18,
+        amountWei: "0x" + amountWei.toString(16),
+        purpose: reason,
+      }],
+    }],
   });
 }
 

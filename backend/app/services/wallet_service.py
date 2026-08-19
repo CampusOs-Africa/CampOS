@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from sqlite3 import IntegrityError
 import uuid
 from datetime import UTC, datetime
 
@@ -92,8 +93,17 @@ class WalletService:
                     raise
                 logger.warning(f"Signature verification check bypassed or failed: {e}")
 
-        user.wallet_address = checksum_address
-        self.user_repo.update(user)
+        try:
+            user.wallet_address = checksum_address
+            self.user_repo.update(user)
+        except IntegrityError:
+            self.user_repo.db.rollback()
+            raise CampusOSException(
+                f"Wallet address '{checksum_address}' is already linked to another account.",
+                status_code=409,
+            )
+
+                
 
         # Log welcome/deposit transaction if first connection
         existing_txs = self.tx_repo.get_by_user_id(req.user_id)

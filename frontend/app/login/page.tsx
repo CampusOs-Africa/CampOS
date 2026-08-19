@@ -45,13 +45,21 @@ export default function LoginPage() {
 
     setLoading(false);
 
-    if (!res.success || !res.user) {
-      setError(res.error || "User with this email not found. Please Sign Up.");
-      return;
+    // if (!res.success || !res.user) {
+    //   setError(res.error || "User with this email not found. Please Sign Up.");
+    //   return;
+    // }
+    
+    // update to the above logic to redirect based on user role
+    if (res.success) {
+      router.push(res.user?.role === "admin" ? "/admin" : "/dashboard");
+      router.refresh();
+    } else {
+      setError(res.error || "Invalid email or password.");
     }
 
-    // Redirect to dashboard on login success
-    router.push("/dashboard");
+    // // Redirect to dashboard on login success
+    // router.push("/dashboard");
   };
 
   const handleDemoLogin = async (id: string) => {
@@ -60,9 +68,10 @@ export default function LoginPage() {
     const res = await loginWithDemoUser(id);
     setLoading(false);
     if (res.success) {
-      router.push("/dashboard");
+      router.push(res.user?.role === "admin" ? "/admin" : "/dashboard");
+      router.refresh();
     } else {
-      setError(res.error || "Failed to log in as demo user.");
+      setError(res.error || "Invalid email or password.");
     }
   };
 
@@ -78,7 +87,7 @@ export default function LoginPage() {
             Log In to CampusOS
           </h1>
           <p className="text-xs text-slate-300">
-            Access your Quai Campus Wallet, Marketplace, and Student Identity Card. JeM
+            Access your Quai Campus Wallet, Marketplace, and Student Identity Card. 
           </p>
         </div>
 

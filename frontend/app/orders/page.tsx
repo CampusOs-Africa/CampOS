@@ -1,5 +1,6 @@
 "use client";
-import { API_BASE_URL } from "../../lib/api";
+import { API_BASE_URL, authHeaders } from "../../lib/api";
+import { useAuth } from "../../context/AuthContext"; 
 
 import React, { useState, useEffect, useCallback } from "react";
 import { EscrowActions } from "../../components/marketplace/EscrowActions";
@@ -16,8 +17,9 @@ import {
 } from "lucide-react";
 
 export default function MyOrdersPage() {
-  const [activeTab, setActiveTab] = useState<"buyer" | "seller">("buyer");
-  const [userId, setUserId] = useState("buyer-demo-001");
+  // const [activeTab, setActiveTab] = useState<"buyer" | "seller">("buyer");
+  const { user } = useAuth();
+  // const [userId, setUserId] = useState("buyer-demo-001");
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,13 +30,21 @@ export default function MyOrdersPage() {
   const [comment, setComment] = useState("");
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"buyer" | "seller">("buyer");
+  const [userId, setUserId] = useState(user?.id || "buyer-demo-001");
+
+  useEffect(() => {
+    if (user?.id) setUserId(user.id);
+  }, [user?.id]);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
+    
     try {
       const res = await fetch(
-        `${API_BASE_URL}/orders/${activeTab}/${userId}`
+        `${API_BASE_URL}/orders/${activeTab}/${userId}`,
+        { headers: authHeaders() }
       );
       if (!res.ok) {
         throw new Error(`Failed to load ${activeTab} orders.`);

@@ -1,5 +1,5 @@
 "use client";
-import { API_BASE_URL } from "../../lib/api";
+import { API_BASE_URL, apiFetch, authHeaders } from "../../lib/api";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { BalanceCard } from "../../components/wallet/BalanceCard";
@@ -32,38 +32,57 @@ export default function WalletPage() {
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
+  // const fetchDashboard = useCallback(async () => {
+  //   if (!userId) return;
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const res = await fetch(`${API_BASE_URL}/wallet/dashboard/${userId}`, {
+  //       headers: authHeaders(),
+  //     });
+  //     if (!res.ok) {
+  //       throw new Error("Failed to fetch Campus Wallet dashboard.");
+  //     }
+  //     const data = await res.json();
+  //     setDashboardData(data);
+  //   } catch (err: any) {
+  //     setError(err.message || "Error loading Campus Wallet.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [userId]);
+
+  // const fetchDashboard = useCallback(async () => {
+  //   if (!userId) return;              // don't fetch until a real user is loaded
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     // Ensure this user's wallet is connected (idempotent on the backend)
+  //     await apiFetch(`/wallet/connect`, {
+  //       method: "POST",
+  //       body: JSON.stringify({
+  //         user_id: userId,
+  //         wallet_address: "0x1111111111111111111111111111111111111111",
+  //         message: "CampusOS Web3 Auth Challenge",
+  //         signature: "0xmock_signature_hex_65_bytes",
+  //       }),
+  //     }).catch(() => {});
+
+  //     const data = await apiFetch(`/wallet/dashboard/${userId}`);
+  //     setDashboardData(data);
+  //   } catch (err: any) {
+  //     setError(err.message || "Error loading Campus Wallet.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [userId]);
+
   const fetchDashboard = useCallback(async () => {
+    if (!userId) return;
     setLoading(true);
     setError(null);
     try {
-      // Create user if not exists so demo always works
-      await fetch(`${API_BASE_URL}/users/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Amina Bello",
-          email: "amina@unijos.edu.ng",
-          role: "student",
-        }),
-      }).catch(() => {});
-
-      // Connect wallet if not connected
-      await fetch(`${API_BASE_URL}/wallet/connect`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: userId,
-          wallet_address: "0x1111111111111111111111111111111111111111",
-          message: "CampusOS Web3 Auth Challenge",
-          signature: "0xmock_signature_hex_65_bytes",
-        }),
-      }).catch(() => {});
-
-      const res = await fetch(`${API_BASE_URL}/wallet/dashboard/${userId}`);
-      if (!res.ok) {
-        throw new Error("Failed to fetch Campus Wallet dashboard.");
-      }
-      const data = await res.json();
+      const data = await apiFetch<any>(`/wallet/dashboard/${userId}`);
       setDashboardData(data);
     } catch (err: any) {
       setError(err.message || "Error loading Campus Wallet.");

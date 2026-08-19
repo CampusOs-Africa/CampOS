@@ -25,7 +25,7 @@ export default function RootLayout({
 
           <footer className="bg-white border-t border-slate-200 py-6 mt-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-              <p>© 2026 CampusOS. Quai × Blip Buildathon Hackathon MVP.</p>
+              <p>© 2026 CampusOS.</p>
               <div className="flex items-center gap-4">
                 <span>Powered by Quai Network & Blip Pay</span>
                 <span>●</span>
