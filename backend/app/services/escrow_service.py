@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.exceptions import CampusOSException, EntityNotFoundError, ForbiddenError
 from app.models.escrow import EscrowRecord
 from app.repositories.escrow_repository import EscrowRepository
@@ -41,19 +42,28 @@ class EscrowService:
         if existing:
             return EscrowRecordResponse.model_validate(existing)
 
-        # Phase 1: Get real wallet addresses for buyer and seller (canonical blockchain identity)
+        # Real Quai escrow requires wallet identities. Mock escrow uses the
+        # application user IDs as logical identities and performs no real tx.
         buyer_user = self.user_repo.get_by_id(req.buyer_id)
         seller_user = self.user_repo.get_by_id(req.seller_id)
 
-        if not buyer_user or not buyer_user.wallet_address:
-            raise EntityNotFoundError("Buyer wallet", req.buyer_id)
-        if not seller_user or not seller_user.wallet_address:
-            raise EntityNotFoundError("Seller wallet", req.seller_id)
+        if not buyer_user:
+            raise EntityNotFoundError("User", req.buyer_id)
+        if not seller_user:
+            raise EntityNotFoundError("User", req.seller_id)
+        if not settings.USE_MOCK_BLOCKCHAIN:
+            if not buyer_user.wallet_address:
+                raise EntityNotFoundError("Buyer wallet", req.buyer_id)
+            if not seller_user.wallet_address:
+                raise EntityNotFoundError("Seller wallet", req.seller_id)
+
+        buyer_identity = buyer_user.wallet_address or buyer_user.id
+        seller_identity = seller_user.wallet_address or seller_user.id
 
         receipt = self.blockchain.createEscrow_sync(
             order_id=req.order_id,
-            buyer_wallet=buyer_user.wallet_address,
-            seller_wallet=seller_user.wallet_address,
+            buyer_wallet=buyer_identity,
+            seller_wallet=seller_identity,
             amount_wei=int(req.amount * 10**18),
         )
 

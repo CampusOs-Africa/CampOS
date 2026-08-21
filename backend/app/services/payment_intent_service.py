@@ -68,26 +68,11 @@ class PaymentIntentService:
         if listing.seller_id == buyer.id:
             raise CampusOSException("You cannot purchase your own listing.", status_code=400)
 
-        # Phase 1: Ensure buyer has a connected wallet (canonical blockchain identity)
-        if not buyer.wallet_address:
-            raise CampusOSException(
-                "You must connect a Quai EVM wallet before making purchases. "
-                "This ensures your blockchain identity for escrow transactions.",
-                status_code=400,
-            )
-
         # Seller must be a verified student to sell.
         seller = self.db.get(User, listing.seller_id)
         if not seller or seller.verification_status not in ("verified", "approved"):
             raise CampusOSException(
                 "This seller is not verified. Purchases are only allowed from verified students.",
-                status_code=400,
-            )
-
-        # Phase 1: Ensure seller has a connected wallet (canonical blockchain identity)
-        if not seller.wallet_address:
-            raise CampusOSException(
-                "This seller has not connected a Quai wallet yet. Purchases cannot proceed without seller blockchain identity.",
                 status_code=400,
             )
 

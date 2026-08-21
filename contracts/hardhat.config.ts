@@ -8,11 +8,8 @@ dotenv.config();
 const TESTNET_RPC =
   process.env.QUAI_TESTNET_RPC_URL || "https://orchard.rpc.quai.network/cyprus1";
 const TESTNET_CHAIN_ID = Number(process.env.QUAI_TESTNET_CHAIN_ID || 15000);
-// Server-side deployer key for testnet only. The default zero key is for
-// local Hardhat tests only. Never reuse a mainnet key here.
-const TESTNET_PRIVATE_KEY =
-  process.env.QUAI_TESTNET_PRIVATE_KEY ||
-  "0x0000000000000000000000000000000000000000000000000000000000000001";
+// A funded Cyprus-1 deployer key is required for testnet deployment.
+const TESTNET_PRIVATE_KEY = process.env.QUAI_TESTNET_PRIVATE_KEY || "";
 
 // --- Quai Mainnet (Cyprus-1 zone, chain ID 9) ---
 const MAINNET_RPC =
@@ -32,7 +29,7 @@ const config: HardhatUserConfig = {
     hardhat: { chainId: 31337 },
     quaiTestnet: {
       url: TESTNET_RPC,
-      accounts: [TESTNET_PRIVATE_KEY],
+      accounts: TESTNET_PRIVATE_KEY ? [TESTNET_PRIVATE_KEY] : [],
       chainId: TESTNET_CHAIN_ID,
     },
     quaiMainnet: {

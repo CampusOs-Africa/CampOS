@@ -10,6 +10,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import CampusOSException
 from app.core.rate_limit import otp_limiter
@@ -251,16 +252,25 @@ async def admin_revoke_verification(
     summary="Verify on-chain credential proof on Quai Network",
     description="Returns simulated or live on-chain verification state, SHA-256 hash, and transaction receipt from Quai StudentIdentity contract.",
 )
-async def verify_blockchain_credential(user_id: str):
-    # Phase 1: Resolve wallet_address instead of deriving synthetic address
-    service = VerificationService(db)
+async def verify_blockchain_credential(
+    user_id: str,
+    service: VerificationService = Depends(get_verification_service),
+):
     user = service.user_repo.get_by_id(user_id)
-    if not user or not user.wallet_address:
+    if not user:
         raise CampusOSException(
-            "User not found or has not connected a wallet yet.",
+            "User not found.",
             status_code=404,
         )
-    return await quai_blockchain_service.verifyCredential(user.wallet_address)
+    blockchain_identity = user.wallet_address
+    if not blockchain_identity and settings.USE_MOCK_BLOCKCHAIN:
+        blockchain_identity = user.id
+    if not blockchain_identity:
+        raise CampusOSException(
+            "User has not connected a wallet yet.",
+            status_code=404,
+        )
+    return await quai_blockchain_service.verifyCredential(blockchain_identity)
 
 
 @router.get(
@@ -320,15 +330,22 @@ async def scan_campus_identity_qr(
             status_code=403,
         )
 
-    # Phase 1: Resolve wallet_address for on-chain verification instead of deriving synthetic address
     user = service.user_repo.get_by_id(user_id)
-    if not user or not user.wallet_address:
+    if not user:
         raise CampusOSException(
-            "User not found or has not connected a wallet yet.",
+            "User not found.",
+            status_code=404,
+        )
+    blockchain_identity = user.wallet_address
+    if not blockchain_identity and settings.USE_MOCK_BLOCKCHAIN:
+        blockchain_identity = user.id
+    if not blockchain_identity:
+        raise CampusOSException(
+            "User has not connected a wallet yet.",
             status_code=404,
         )
 
-    is_on_chain_verif = await quai_blockchain_service.isVerified(user.wallet_address)
+    is_on_chain_verif = await quai_blockchain_service.isVerified(blockchain_identity)
 
     return {
         "valid": True,

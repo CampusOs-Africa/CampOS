@@ -87,13 +87,6 @@ class MarketplaceService:
                 "You must possess an approved Verified Student Identity to list items for sale on CampusOS."
             )
 
-        # Phase 1: Require seller has a connected wallet (canonical blockchain identity)
-        if not seller.wallet_address:
-            raise ForbiddenError(
-                "You must connect a Quai EVM wallet before creating marketplace listings. "
-                "This ensures your blockchain identity is established for escrow transactions."
-            )
-
         listing = MarketplaceListing(
             seller_id=req.seller_id,
             title=req.title,

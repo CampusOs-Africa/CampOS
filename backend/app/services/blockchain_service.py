@@ -204,6 +204,7 @@ class MockBlockchainService(BlockchainService):
         self, order_id: str, buyer: str, seller: str, amount_wei: int
     ) -> dict[str, Any]:
         tx_hash = f"0xquai_escrow_create_{uuid.uuid4().hex[:16]}"
+
         self._escrows[order_id] = {
             "order_id": order_id,
             "buyer": buyer,
@@ -212,17 +213,27 @@ class MockBlockchainService(BlockchainService):
             "state": "CREATED",
             "tx_hash": tx_hash,
         }
+
         logger.info(
-            f"[MOCK-BLOCKCHAIN] Created escrow for order {order_id}, tx_hash: {tx_hash}"
+            f"[MOCK-BLOCKCHAIN] Created escrow for order {order_id}, "
+            f"buyer={buyer}, seller={seller}, tx_hash={tx_hash}"
         )
+
         return {
             "order_id": order_id,
             "tx_hash": tx_hash,
             "block_number": 1,
             "state": "CREATED",
-            "event_data": {"event": "EscrowCreated", "orderId": order_id},
+            "event_data": {
+                "event": "EscrowCreated",
+                "orderId": order_id,
+                "buyer": buyer,
+                "seller": seller,
+                "amount": amount_wei,
+            },
             "timestamp": utc_now_iso(),
         }
+
 
     async def createEscrow(
         self, order_id: str, buyer: str, seller: str, amount_wei: int
@@ -478,14 +489,23 @@ class QuaiBlockchainService(BlockchainService):
             logger.error(f"Error initializing QuaiBlockchainService: {e}")
 
     def _resolve_evm_address(self, wallet_address: str) -> str:
-        """Validate and checksum a wallet address. Requires a real address, not a user_id."""
-        if not Web3.is_address(wallet_address):
+        """Resolve a real EVM address or deterministically derive one from a UUID."""
+        if Web3.is_address(wallet_address):
+            return Web3.to_checksum_address(wallet_address)
+
+        try:
+            uuid.UUID(wallet_address)
+        except (ValueError, AttributeError):
             raise CampusOSException(
-                f"Invalid EVM address format: '{wallet_address}'. "
-                "Phase 1 requires a real connected wallet address (starting with 0x).",
+                f"Invalid EVM address or user UUID: '{wallet_address}'.",
                 status_code=400,
             )
-        return Web3.to_checksum_address(wallet_address)
+
+        # Deterministically derive a valid 20-byte EVM address from the UUID.
+        address_bytes = hashlib.sha256(wallet_address.encode("utf-8")).digest()[-20:]
+        derived_address = Web3.to_checksum_address(Web3.to_hex(address_bytes))
+
+        return derived_address
 
     def _resolve_order_id_bytes32(self, order_id: str) -> bytes:
         """Resolve an order UUID or hex string to a deterministic 32-byte Quai bytes32 identifier."""
@@ -697,7 +717,7 @@ class QuaiBlockchainService(BlockchainService):
             receipt, event_name="StudentVerified", contract=self.identity_contract
         )
         return {
-            "user_id": user_id,
+            "wallet_address": evm_address,
             "tx_hash": parsed["tx_hash"],
             "block_number": parsed["block_number"],
             "status": "verified",
@@ -729,6 +749,7 @@ class QuaiBlockchainService(BlockchainService):
                 "block_number": 1,
                 "timestamp": utc_now_iso(),
             }
+            
 
         evm_address = self._resolve_evm_address(wallet_address)
         logger.info(f"Initiating Quai transaction: revokeStudent({evm_address})")
@@ -760,7 +781,7 @@ class QuaiBlockchainService(BlockchainService):
             receipt, event_name="StudentRevoked", contract=self.identity_contract
         )
         return {
-            "user_id": user_id,
+            "wallet_address": evm_address,
             "status": "revoked",
             "tx_hash": parsed["tx_hash"],
             "block_number": parsed["block_number"],
@@ -1214,9 +1235,35 @@ class QuaiBlockchainService(BlockchainService):
 
     # Synchronous wrappers for non-async callers in domain services
     def createEscrow_sync(
-        self, order_id: str, buyer: str, seller: str, amount_wei: int
+        self,
+        order_id: str,
+        buyer: str | None = None,
+        seller: str | None = None,
+        amount_wei: int = 0,
+        buyer_wallet: str | None = None,
+        seller_wallet: str | None = None,
     ) -> dict[str, Any]:
-        return self._create_escrow_sync(order_id, buyer, seller, amount_wei)
+        buyer_address = buyer_wallet or buyer
+        seller_address = seller_wallet or seller
+
+        if not buyer_address:
+            raise CampusOSException(
+                "Buyer wallet address is required for escrow creation.",
+                status_code=400,
+            )
+
+        if not seller_address:
+            raise CampusOSException(
+                "Seller wallet address is required for escrow creation.",
+                status_code=400,
+            )
+
+        return self._create_escrow_sync(
+            order_id,
+            buyer_address,
+            seller_address,
+            amount_wei,
+        )
 
     def deposit_sync(self, order_id: str, amount_wei: int) -> dict[str, Any]:
         return self._deposit_sync(order_id, amount_wei)

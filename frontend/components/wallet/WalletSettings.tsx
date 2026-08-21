@@ -2,19 +2,6 @@
 
 import { API_BASE_URL, authHeaders } from "../../lib/api";
 import { connectBlip, detectBlip } from "../../lib/blip";
-// inside handleUpdateWallet, before the fetch:
-const provider = detectBlip();
-if (!provider) {
-  alert("Open this page inside the Blip in-app browser to sign with a real wallet.");
-  return;
-}
-const account = await connectBlip(provider);
-const message = "CampusOS Wallet Re-Authentication & Update Challenge";
-const signature = await provider.request({
-  method: "personal_sign",
-  params: ["0x" + Buffer.from(message).toString("hex"), account],
-});
-// then POST { user_id: userId, wallet_address: account, message, signature }
 
 import React, { useState } from "react";
 import { Settings, Key, ShieldCheck, ExternalLink, X, RefreshCw, Loader2 } from "lucide-react";
@@ -52,14 +39,30 @@ export const WalletSettings: React.FC<WalletSettingsProps> = ({
     setLoading(true);
     setSuccess(null);
     try {
+      const provider = detectBlip();
+      if (!provider) {
+        alert("Open this page inside the Blip in-app browser to sign with a real wallet.");
+        return;
+      }
+
+      const account = await connectBlip(provider);
+      const message = "CampusOS Wallet Re-Authentication & Update Challenge";
+      const messageHex = Array.from(new TextEncoder().encode(message), (byte) =>
+        byte.toString(16).padStart(2, "0"),
+      ).join("");
+      const signature = await provider.request({
+        method: "personal_sign",
+        params: [`0x${messageHex}`, account],
+      });
+
       const res = await fetch(`${apiBaseUrl}/wallet/connect`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
         body: JSON.stringify({
           user_id: userId,
-          wallet_address: newAddress.trim(),
-          message: "CampusOS Wallet Re-Authentication & Update Challenge",
-          signature: "0xmock_signature_hex_digest_65_bytes",
+          wallet_address: account,
+          message,
+          signature,
         }),
       });
       const data = await res.json();

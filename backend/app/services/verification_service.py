@@ -320,14 +320,6 @@ class VerificationService:
         if not user:
             raise EntityNotFoundError("User", verif.user_id)
 
-        # Phase 1: Require that the user has a connected wallet before on-chain registration
-        if not user.wallet_address:
-            raise CampusOSException(
-                "User must have a connected Quai wallet (User.wallet_address) before verification can be registered on-chain. "
-                "Please ask the student to connect their wallet first.",
-                status_code=400,
-            )
-
         # 1. Generate SHA-256 cryptographic credential hash
         cred_hash = self.blockchain.createCredentialHash(
             user_id=verif.user_id,
@@ -336,8 +328,15 @@ class VerificationService:
             admission_letter_url=verif.admission_letter_url,
         )
 
-        # 2. Store on Quai smart contract using real wallet address (Phase 1: canonical blockchain identity)
-        tx_receipt = await self.blockchain.registerStudent(wallet_address=user.wallet_address, cred_hash=cred_hash)
+        # 2. Register on-chain when an identity is available. Mock mode uses
+        # the user's UUID as a deterministic logical blockchain identity.
+        tx_receipt: dict[str, Any] = {}
+        blockchain_identity = user.wallet_address
+        if blockchain_identity or settings.USE_MOCK_BLOCKCHAIN:
+            blockchain_identity = blockchain_identity or verif.user_id
+            tx_receipt = await self.blockchain.registerStudent(
+                blockchain_identity, cred_hash
+            )
 
         # 3. Update verification record
         verif.status = "approved"
@@ -362,7 +361,10 @@ class VerificationService:
             old_status=old_status,
             new_status="approved",
             changed_by=admin_id,
-            reason=f"Approved by Administrator. Awarded +10 Trust Score and registered credential hash on Quai Network (tx_hash: {verif.tx_hash}).",
+            reason=(
+                "Approved by Administrator. Awarded +10 Trust Score and "
+                f"processed credential registration on Quai Network (tx_hash: {verif.tx_hash})."
+            ),
         )
         self.verif_repo.create_history(history)
 

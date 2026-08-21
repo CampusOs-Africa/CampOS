@@ -8,19 +8,22 @@ from app.schemas.escrow import EscrowCreateRequest
 from app.services.escrow_service import EscrowService
 
 
+
 def test_escrow_service_lifecycle_and_actions(db_session):
     buyer = User(
-        id="escrow-buyer-01",
-        name="Chidi Okafor",
-        email="chidi.esc@unijos.edu.ng",
-        verification_status="verified",
-    )
+    id="escrow-buyer-01",
+    name="Chidi Okafor",
+    email="chidi.esc@unijos.edu.ng",
+    verification_status="verified",
+    wallet_address="0x2222222222222222222222222222222222222222",
+)
     seller = User(
-        id="escrow-seller-01",
-        name="Amina Bello",
-        email="amina.esc@unijos.edu.ng",
-        verification_status="verified",
-    )
+    id="escrow-seller-01",
+    name="Amina Bello",
+    email="amina.esc@unijos.edu.ng",
+    verification_status="verified",
+    wallet_address="0x3333333333333333333333333333333333333333",
+)
     db_session.add(buyer)
     db_session.add(seller)
     db_session.commit()
@@ -101,8 +104,19 @@ def test_escrow_service_lifecycle_and_actions(db_session):
 
 
 def test_escrow_service_refund(db_session):
-    buyer = User(id="eb-02", name="Buyer 2", email="b2@test.org")
-    seller = User(id="es-02", name="Seller 2", email="s2@test.org")
+    buyer = User(
+    id="eb-02",
+    name="Buyer 2",
+    email="b2@test.org",
+    wallet_address="0x4444444444444444444444444444444444444444",
+)
+
+    seller = User(
+        id="es-02",
+        name="Seller 2",
+        email="s2@test.org",
+        wallet_address="0x5555555555555555555555555555555555555555",
+    )
     db_session.add(buyer)
     db_session.add(seller)
     db_session.commit()
